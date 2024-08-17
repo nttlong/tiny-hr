@@ -1,0 +1,1 @@
+Write react component (refer that image) and guide me use that in home page

@@ -1,0 +1,1 @@
+Write react component (refer that image) that component always alight top of my app
