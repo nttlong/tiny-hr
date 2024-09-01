@@ -1,4 +1,4 @@
-from app.models.roles import Role
+from app.models.roles import Roles
 from sqlalchemy import create_engine
 engine = create_engine('mysql+pymysql://root:123456@localhost', echo=True)
 
@@ -6,9 +6,9 @@ engine = create_engine('mysql+pymysql://root:123456@localhost', echo=True)
 from app.models.employees import Employee
 from app.models.departments import Department
 
-from app.models.roles import Role
+from app.models.roles import Roles
 registry.configure()
-role =Role(
+role =Roles(
     code='admin',
     name='Admin'
 )

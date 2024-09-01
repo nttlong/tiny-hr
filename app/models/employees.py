@@ -14,7 +14,7 @@ from .personal_info import PersonalInfo
 from .departments import Department
 from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
 
-class Employee(BaseModeCodeName):
+class Employees(BaseModeCodeName):
     """
     The info of employee
 

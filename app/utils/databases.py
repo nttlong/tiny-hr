@@ -18,14 +18,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import Engine
 from sqlalchemy.ext.declarative import declarative_base
 
-class DbColumnInfo:
-    def __init__(self, engine: Engine, column):
-        self. column_name = column.compile(dialect=engine.dialect)
-        self.column_type = column.type.compile(engine.dialect)
-        self.table_name = column.table.name
-        self.db_column_name = column.name
-        if hasattr(column.type, "length"):
-            self.column_size = column.type.length
+
 
 def check_database_exist(session: Session, database_name: str) -> bool:
     """

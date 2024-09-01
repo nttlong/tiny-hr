@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 from sqlalchemy.ext.declarative import declarative_base
 from .base_model import BaseModeCodeName
-class Department(BaseModeCodeName):
+class Departments(BaseModeCodeName):
     """
     The info of department
 
@@ -15,6 +15,6 @@ class Department(BaseModeCodeName):
     ParentId = Column(String(32), ForeignKey('Departments.Id'))
     # parent = relationship('Department', remote_side=[BaseModeCodeName.Id])
 
-    # users = relationship("User", back_populates="Role")
+    # users = relationship("User", back_populates="Roles")
     employees = relationship('Employee', back_populates='Department')
 

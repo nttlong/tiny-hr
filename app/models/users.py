@@ -6,17 +6,17 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from  .base_model import BaseModel   # Define the base class for our models
 import uuid
-from .roles import Role
+from .roles import Roles
 import bcrypt
-class User(BaseModel):
+class Users(BaseModel):
     __tablename__ = 'Users'
     Username = Column(String(50), unique=True, nullable=False)
     Email = Column(String(100), unique=True, nullable=False)
     HashPassword = Column(String(60), nullable=False)
     Salt = Column(String(60), nullable=False)
 
-    RoleId = Column(String(36), ForeignKey(Role.Id), nullable=False)
-    Role = relationship(Role)
+    RoleId = Column(String(36), ForeignKey(Roles.Id), nullable=False)
+    Role = relationship(Roles)
     def __init__(self, Username, Email, Password, RoleId):
 
         super().__init__()

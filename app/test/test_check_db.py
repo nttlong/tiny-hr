@@ -81,7 +81,7 @@ class TestAppUtilsDatabases(unittest.TestCase):
         """
         # get all columns of model
 
-        columns=get_all_columns_of_model(User)
+        columns=get_all_columns_of_model(Users)
         print(columns)
 
     def test_switch_database(self):

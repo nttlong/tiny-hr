@@ -22,7 +22,7 @@ engine = create_engine('mysql+pymysql://root:123456@localhost', echo=True)
 
 # create table class
 # from app.models.users import User
-from app.models.roles import Role
+from app.models.roles import Roles
 # from app.models.departments import Department
 # from app.models.personal_info import PersonalInfo
 # from app.utils.databases import (
@@ -39,8 +39,8 @@ from app.models.roles import Role
 # session = Session()
 #
 # create_database(session, 'test')
-# create_table_if_not_exist(session, Role, 'test')
-role1 = Role(
+# create_table_if_not_exist(session, Roles, 'test')
+role1 = Roles(
     code='admin',
     name='Admin'
 )
@@ -49,7 +49,7 @@ role1 = Role(
 # create_table_if_not_exist(session, PersonalInfo, 'test')
 # create_table_if_not_exist(session, Employee, 'test')
 # # create sample data
-# role1 = Role(
+# role1 = Roles(
 #     code='admin',
 #     name='Admin'
 # )
@@ -63,7 +63,7 @@ role1 = Role(
 #     Code='IT'
 # )
 # list_of_user =session.query(User).all()
-# role = session.query(Role).first()
+# role = session.query(Roles).first()
 # role.Users.append(user1)
 #
 # ic(list_of_user)
