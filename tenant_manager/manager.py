@@ -16,56 +16,6 @@ __table_sync_cache__ is a cache for storing the table schema of the entities.
 The key of the cache is db name and the value is a dictionary of table name in that database
 ex: __table_sync_cache__ = {"tenant1": {"users": True, "roles": True}
 """
-class Tenant:
-    def __init__(self, db_url:str, tenant_db_name:str):
-        self.tenant_db_name = tenant_db_name
-        self.engine = create_engine(db_url+"/"+tenant_db_name)
-
-    def session(self)->Session:
-        """
-        Create a new session for the given tenant.
-        :return:
-        """
-
-       # create session
-
-        session = sessionmaker(bind=self.engine)()
-        # use the given tenant database
-
-        # use_db_stmt = text(f"USE {self.tenant_db_name};")
-        # session.execute(use_db_stmt)
-        sql_stmt = text(f"USE {self.tenant_db_name};")
-        session.execute(sql_stmt)
-        return session
-    def query(self,session:Session,entity):
-        """
-        Create table for the given entity.
-        Query the given entity from the given session.
-        :param session:
-        :param entity:
-        :return:
-        """
-
-        # create table for the given entity
-
-        # synchronize all columns of table to database
-        # check if database name and table is already exist in cache
-        if __table_sync_cache__.get(self.tenant_db_name,{}).get(entity.__tablename__):
-            return session.query(entity)
-        entity.__table__.create(session.bind, checkfirst=True)
-        for column in entity.__table__.columns:
-            # check if column name is not in table
-            if not session.execute(text(f"SHOW COLUMNS FROM {entity.__tablename__} LIKE '{column.name}'")).first():
-                # add column to table
-                # get db column type of column in entity by using sqlalchemy.types
-                db_column_type = column.type.compile(self.engine.dialect)
-
-                session.execute(text(f"ALTER TABLE {entity.__tablename__} ADD COLUMN {column.name} {db_column_type};"))
-        # add table to cache
-        __table_sync_cache__.setdefault(self.tenant_db_name,{})[entity.__tablename__] = True
-        return session.query(entity)
-
-
 
 
 
@@ -83,22 +33,124 @@ class Manager:
     def __init__(self, db_url:str):
         self.db_url = db_url
         self.engine = create_engine(db_url)
+        self.db_engines = {}
         self.tenants = {}
-    def __getitem__(self, item)->Tenant:
-        return self.get_tenant(item)
-    def get_tenant(self, tenant_db_name: str) -> Tenant:
-        """
-        Create a new tenant and return the Tenant object.
-        """
-        # For code first approach, we can create the database if datbase is not exist
+        self.db_cache = {}
 
-        sql = f"CREATE DATABASE IF NOT EXISTS {tenant_db_name};"
-        sql_stmt = text(sql)
-        with self.engine.connect() as conn:
-            conn.execute(sql_stmt)
-        if tenant_db_name in self.tenants:
-            return self.tenants[tenant_db_name]
-        else:
-            tenant = Tenant(self.db_url, tenant_db_name)
-            self.tenants[tenant_db_name] = tenant
-            return tenant
+
+
+
+    def __sync_table_to_database__(self,session:Session,entity,db_name:str):
+        """
+        Create table for the given entity.
+        Query the given entity from the given session.
+        :param session:
+        :param entity:
+        :return:
+        """
+
+        # create table for the given entity
+
+        # synchronize all columns of table to database
+        # check if database name and table is already exist in cache
+        if __table_sync_cache__.get(db_name,{}).get(entity.__tablename__):
+            return
+        entity.__table__.create(session.bind, checkfirst=True)
+        for column in entity.__table__.columns:
+            # check if column name is not in table
+            if not session.execute(text(f"SHOW COLUMNS FROM {entity.__tablename__} LIKE '{column.name}'")).first():
+                # add column to table
+                # get db column type of column in entity by using sqlalchemy.types
+                db_column_type = column.type.compile(self.engine.dialect)
+
+                session.execute(text(f"ALTER TABLE {entity.__tablename__} ADD COLUMN {column.name} {db_column_type};"))
+        # add table to cache
+        __table_sync_cache__.setdefault(db_name,{})[entity.__tablename__] = True
+
+    def __apply_auto_create_table__(self, session:Session,db_name:str)->Session:
+        """
+        Apply auto create table feature to the given session.
+
+
+        """
+        old_query = session.query
+        def query(entity):
+            # get tabe name of entity
+            table_name = entity.__tablename__
+            db = self.db_cache.get(db_name)
+            if isinstance(db,dict) and db.get(table_name) is not None:
+                return old_query(entity)
+            # check if table is already exist in database
+            self.__sync_table_to_database__(session, entity, db_name)
+            # mark table is ready created in db_cache
+            self.db_cache.setdefault(db_name,{})[table_name] = True
+
+            return old_query(entity)
+        session.query = query
+        old_add = session.add
+        def add(entity):
+            if entity is None:
+                return
+            # get tabe name of entity
+            table_name = entity.__tablename__
+            db = self.db_cache.get(db_name)
+            if isinstance(db,dict) and db.get(table_name) is not None:
+                return old_add(entity)
+            # check if table is already exist in database
+            self.__sync_table_to_database__(session, entity, db_name)
+            # mark table is ready created in db_cache
+            self.db_cache.setdefault(db_name,{})[table_name] = True
+
+            return old_add(entity)
+        session.add = add
+        old_merge = session.merge
+        def merge(entity):
+            # get tabe name of entity
+            if entity is None:
+                return
+            # get tabe name of entity
+            table_name = entity.__tablename__
+            db = self.db_cache.get(db_name)
+
+
+            if isinstance(db,dict) and db.get(table_name) is not None:
+                return old_merge(entity)
+            # check if table is already exist in database
+            self.__sync_table_to_database__(session, entity, db_name)
+            return old_merge(entity)
+        session.merge = merge
+        old_delete = session.delete
+        def delete(entity):
+            if entity is None:
+                return
+            # get tabe name of entity
+            table_name = entity.__tablename__
+            db = self.db_cache.get(db_name)
+
+            if isinstance(db,dict) and db.get(table_name) is not None:
+                return old_delete(entity)
+            # check if table is already exist in database
+            self.__sync_table_to_database__(session, entity, db_name)
+            return old_delete(entity)
+        session.delete = delete
+        return session
+    def db_session(self, db_name: str)->Session:
+
+        #check if db_name in session_cache
+        if self.db_cache.get(db_name) is None:
+            sql = f"CREATE DATABASE IF NOT EXISTS {db_name};"
+            sql_stmt = text(sql)
+            with self.engine.connect() as conn:
+                conn.execute(sql_stmt)
+
+        # create new session
+        if self.db_engines.get(db_name) is None:
+            self.db_engines[db_name] = create_engine(self.db_url + "/" + db_name)
+
+        session = sessionmaker(bind=self.db_engines[db_name] )()
+        session.execute(text(f"USE {db_name};"))
+        if self.db_cache.get(db_name) is None:
+            self.db_cache[db_name] = dict()
+
+        session = self.__apply_auto_create_table__(session,db_name)
+        return session

@@ -37,5 +37,6 @@ class BaseModeCodeName(BaseModel):
         super().__init__()
         self.Code = code
         self.Name = name
+        self.Id = str(uuid.uuid4())
 
 

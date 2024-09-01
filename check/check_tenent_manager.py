@@ -9,12 +9,23 @@ from app.models.roles import Roles
 
 
 
-manager = Manager('mysql+pymysql://root:123456@localhost')
-manager2=Manager('mysql+pymysql://root:123456@localhost')
-test_tenant = manager["db_test"]
-hr_tenant = manager["db_hr"]
-test_tenant.query(test_tenant.session(),Roles).first()
-print(manager2==manager)
+
+
+if __name__ == '__main__':
+    manager = Manager('mysql+pymysql://root:123456@localhost')
+    session = manager.db_session("hrm")
+
+    role = session.query(Roles).filter_by(Code="admin").first()
+    session.delete(role)
+
+    session.commit()
+    session.close()
+
+    print("done")
+
+
+
+
 
 
 
