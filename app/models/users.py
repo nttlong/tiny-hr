@@ -16,7 +16,7 @@ class Users(BaseModel):
     Salt = Column(String(60), nullable=False)
 
     RoleId = Column(String(36), ForeignKey(Roles.Id), nullable=False)
-    Role = relationship(Roles)
+    role = relationship(Roles)
     def __init__(self, Username, Email, Password, RoleId):
 
         super().__init__()

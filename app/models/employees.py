@@ -10,8 +10,8 @@ Base = declarative_base()
 
 # Define the Employee model
 from .base_model import  BaseModeCodeName
-from .personal_info import PersonalInfo
-from .departments import Department
+
+from .departments import Departments
 from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
 
 class Employees(BaseModeCodeName):
@@ -25,13 +25,12 @@ class Employees(BaseModeCodeName):
 
     JobTitle = Column(String(100), nullable=False)
     
-    DepartmentId = Column(String(32), ForeignKey(Department.Id), nullable=False)
-    department = relationship(Department)
+    DepartmentId = Column(String(32), ForeignKey(Departments.Id), nullable=False)
+    department = relationship(Departments)
 
 
     Salary = Column(Integer, nullable=False)
     IsActive = Column(Boolean, nullable=False)
 
     HireDate = Column(DateTime, nullable=False)
-    PersonalInfoId = Column(String(32), ForeignKey(PersonalInfo.Id), nullable=False)
-    PersonalInfo = relationship(PersonalInfo, back_populates="Employee")
+

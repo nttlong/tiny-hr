@@ -6,7 +6,7 @@ from .kit_services import singleton
 
 
 @singleton
-class DBContext:
+class DBService:
     """
     This class is used to manage the database connections.
     """

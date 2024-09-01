@@ -1,21 +1,22 @@
+
 """
-This package contains the database session management.
-It declares a class DbSession is inheriting from sqlalchemy.orm.session.Session.
-Some Dunder methods are defined to manage the session in a context manager.
+This dictionary is used to check if table is already exist or not.
+The key is database name and value is dictionary of table name and boolean value.
+Example:
+__table_check__ = {
+    'db1': {
+        'table1': True,
+        'table2': False
+        },
+        
+    'db2': {
+        'table1': True,
+        'table2': True
+        }
+    
+}
+        
 """
-
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
-from .db_column_info import DbColumnInfo
-from typing import Iterator
-
-# Define  a variable storing the global all database is existing
-# everytime when use use_db of DbSession
-# it will check if database is not exist it automatically create it
-# and cache if in dictionary call __db_check__
-
-__db_check__ = {}
-
 
 
 class DbSession(Session):
@@ -25,6 +26,16 @@ class DbSession(Session):
 
     def __init__(self, db_engine):
         super().__init__(bind=db_engine)
+        self.__database_name__ = None
+
+    @property
+    def __get_database_name__(self):
+        """
+        Read-only property to get the database name of the current session.
+        :return:
+        """
+        return self.__database_name__
+
 
     def __enter__(self):
         return self
@@ -77,80 +88,55 @@ class DbSession(Session):
     def execute(self, *args, **kwargs):
         return super().execute(*args, **kwargs)
 
-    def use_db(self, db_name):
 
-        # check if db_name is already exist in __db_check__ if not call create_database_if_not_exist
-        # then use_db
 
-        if not __db_check__.get(db_name):
-            self.create_database_if_not_exist(db_name)
-            __db_check__[db_name] = True
 
-        sql_stmt = text(f"USE {db_name}")
-        self.bind.execute(sql_stmt)
-        return self
 
-    def get_column_info(self, model_or_table_name) -> Iterator['DbColumnInfo']:
+
+
+
+
+
+
+    def create_table_if_not_exist(self, model):
         """
-        This method returns an iterator of DbColumnInfo objects for the given model.
-        :param model_or_table_name:
+        This method creates a new table with the given model.
+        :param model:
         :return:
         """
-        if isinstance(model_or_table_name, str):
-            # developer passed in a table name as a string
-            # run sql query to get the column names, data types,
-            # data type sizes, and other information   for the given table name
-            return self.__get_column_info_from_table_name__(table_name=model_or_table_name)
-        else:
-            # developer passed in a model as an argument
-            # get the table name from the model
-            return self.__get_column_info_from_columns_of_model__(columns=model_or_table_name.__table__.columns)
+        # the first get table name from model and check if it in __table_check__
+        # if not create table and add it in __table_check__
+        # if exist return
+        table_name = model.__table__.name
+        if __table_check__.get(self.__database_name__, {}).get(table_name):
+            return
 
-    def __get_column_info_from_table_name__(self, table_name) -> Iterator['DbColumnInfo']:
+        model.__table__.create(self.bind, checkfirst=True)
+        # get all columns in database
+        columns_in_database = self.__get_column_info_from_table_name__(table_name=table_name)
+        # get all columns in model
+        columns_in_model = self.__get_column_info_from_columns_of_model__(columns=model.__table__.columns)
+        # get all columns in model but not in database
+        columns_to_create = [column for column in columns_in_model if column not in columns_in_database]
+        # create new table with new columns
+        if columns_to_create:
+            new_table = model.__table__.tometadata(self.bind)
+
+            # add new columns in __table_check__
+            for column in columns_to_create:
+                self.__create_column_in_table__(table_name=table_name, column=column)
+    def __create_column_in_table__(self, table_name, column):
         """
-        This method returns an iterator of DbColumnInfo objects for the given table name.
+        This method creates a new column in the given table.
         :param table_name:
+        :param column:
         :return:
         """
-        # execute the query to get the column names,
-        # data types, data type sizes, and other information
-        # for the given table name
-        sql_stmt = text(f"SELECT "
-                        f"column_name, "
-                        f"data_type, "
-                        f"character_maximum_length, "
-                        f"numeric_precision, "
-                        f"numeric_scale, "
-                        f"is_nullable FROM information_schema.columns WHERE table_name = '{table_name}'")
-        result = self.bind.execute(sql_stmt)
-        for row in result:
-            yield DbColumnInfo(
-                column_name=row[0],
-                data_type=row[1],
-                character_maximum_length=row[2],
-                numeric_precision=row[3],
-                numeric_scale=row[4],
+        # create new column in table
+        column.create(self.bind, checkfirst=True)
+        # add new column in __table_check__
 
-            )
 
-    def __get_column_info_from_columns_of_model__(self, columns) -> Iterator['DbColumnInfo']:
-        """
-        This method returns an iterator of DbColumnInfo objects for the given model.
-        columns: sqlalchemy.sql.schema.ColumnCollection
-        :param columns:
-        :return:
-        """
-        for column in columns:
-            yield DbColumnInfo(engine=self.bind, column=column)
-
-    def create_database_if_not_exist(self, db_name):
-        """
-        This method creates a new database with the given name.
-        :param db_name:
-        :return:
-        """
-        sql_stmt = text(f"CREATE DATABASE {db_name} IF NOT EXISTS")
-        self.bind.execute(sql_stmt)
 
 
 if __name__ == '__main__':

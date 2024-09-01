@@ -16,5 +16,5 @@ class Departments(BaseModeCodeName):
     # parent = relationship('Department', remote_side=[BaseModeCodeName.Id])
 
     # users = relationship("User", back_populates="Roles")
-    employees = relationship('Employee', back_populates='Department')
+    employees = relationship('Employees', back_populates='department')
 
