@@ -33,7 +33,7 @@ def __synchronize_all_indexes_mysql__(session_instance, entity, table_name):
     """
     db_index: list[IndexInfo] = __get_all_indexes_in_database__(session_instance, table_name)
     model_index: list[IndexInfo] = __get_all_indexes_in_code_model__(entity)
-
+    raise NotImplementedError("Not implemented for MySQL")
 
 def __synchronize_session_with_code_model_mysql__(session_instance, entity, table_name,db_name):
     sql_get_column_names = text(

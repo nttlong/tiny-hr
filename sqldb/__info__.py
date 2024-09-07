@@ -1,7 +1,10 @@
 class IndexInfo:
-    def __init__(self, name, columns):
+    def __init__(self, name, columns, is_unique=False, is_primary=False):
         self.name = name
         self.columns = columns
+        self.is_unique = is_unique
+        self.is_primary = is_primary
+
 __cache_model_index__ = dict()
 def __get_all_indexes_in_code_model__(entity) -> list[IndexInfo]:
     """

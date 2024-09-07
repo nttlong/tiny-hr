@@ -28,18 +28,10 @@ from sqlalchemy import create_engine, event, Executable
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import text
 
-from sqldb.___my_sql__ import __synchronize_session_with_code_model_mysql__
+from sqldb.__utils_my_sql__ import __synchronize_session_with_code_model_mysql__
+from sqldb.__utils_sql_server__ import __synchronize_session_with_code_model_sqlserver__
 from sqldb.__info__ import IndexInfo
 __cache_db_name_and_table_name__ = dict()
-
-
-
-
-
-
-
-
-
 
 
 
@@ -68,8 +60,10 @@ def __synchronize_session_with_code_model__(session_instance, entity):
         return
 
     entity.__table__.create(session_instance.bind, checkfirst=True)
-    if dialectical == "mssql":
+    if dialectical == "mysql":
         __synchronize_session_with_code_model_mysql__(session_instance, entity, table_name,db_name)
+    if dialectical =="mssql":
+        __synchronize_session_with_code_model_sqlserver__(session_instance, entity, table_name, db_name)
     # get all column names of table in database by executing a query
 
 
