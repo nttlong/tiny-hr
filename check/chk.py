@@ -1,18 +1,15 @@
-from app.models.roles import Roles
+"""
+This is the test
+use sqldb package connect to MSSQL server
+"""
 from sqlalchemy import create_engine
-engine = create_engine('mysql+pymysql://root:123456@localhost', echo=True)
 
-# create base class
-from app.models.employees import Employee
-from app.models.departments import Department
-
+from sqldb.db import SQLDB
 from app.models.roles import Roles
-registry.configure()
-role =Roles(
-    code='admin',
-    name='Admin'
-)
+from sqlalchemy.sql import text
+sqldb=SQLDB('mssql+pymssql://sa:123456@localhost/master')
 
 
-print(role.code)
-print(role.name)
+session=sqldb.get_session("hr")
+items=session.query(Roles).all()
+print(items)
