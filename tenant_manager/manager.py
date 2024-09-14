@@ -60,8 +60,8 @@ class Manager:
             # check if column name is not in table
             if not session.execute(text(f"SHOW COLUMNS FROM {entity.__tablename__} LIKE '{column.name}'")).first():
                 # add column to table
-                # get db column type of column in entity by using sqlalchemy.types
-                db_column_type = column.type.compile(self.engine.dialect)
+                # get db column _type of column in entity by using sqlalchemy.types
+                db_column_type = column._type.compile(self.engine.dialect)
 
                 session.execute(text(f"ALTER TABLE {entity.__tablename__} ADD COLUMN {column.name} {db_column_type};"))
         # add table to cache

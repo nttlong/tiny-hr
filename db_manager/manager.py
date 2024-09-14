@@ -35,7 +35,7 @@ def __get_column_info_from_table_name__(session:Session, table_name) -> Iterator
     :return:
     """
     # execute the query to get the column names,
-    # data types, data type sizes, and other information
+    # data types, data _type sizes, and other information
     # for the given table name
     sql_stmt = text(f"SELECT "
                     f"column_name, "
@@ -64,7 +64,7 @@ def get_column_info(session: Session, model_or_table_name) -> Iterator['DbColumn
         if isinstance(model_or_table_name, str):
             # developer passed in a table name as a string
             # run sql query to get the column names, data types,
-            # data type sizes, and other information   for the given table name
+            # data _type sizes, and other information   for the given table name
             return __get_column_info_from_table_name__(
                 session=session,
                 table_name=model_or_table_name

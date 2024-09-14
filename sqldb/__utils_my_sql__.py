@@ -44,7 +44,7 @@ def __synchronize_session_with_code_model_mysql__(session_instance, entity, tabl
     sync_cols = list(set(column_names_in_code_model) - set(column_names_in_db))
     for col in sync_cols:
         # create column in database
-        col_type = entity.__table__.columns[col].type.compile(dialect=session_instance.bind.dialect)
+        col_type = entity.__table__.columns[col]._type.compile(dialect=session_instance.bind.dialect)
 
         sql_create_column = text(f"ALTER TABLE {table_name} ADD COLUMN {col} {col_type}")
         session_instance.execute(sql_create_column)

@@ -23,8 +23,8 @@ from sqlalchemy.ext.declarative import declarative_base
 def check_database_exist(session: Session, database_name: str) -> bool:
     """
     Check if database is exiting by using sqlalchemy  session
-    :type session: sqlalchemy.orm.session.Session
-    :type database_name: str
+    :_type session: sqlalchemy.orm.session.Session
+    :_type database_name: str
     :param session:
     :param database_name:
     :return:
@@ -41,8 +41,8 @@ def check_database_exist(session: Session, database_name: str) -> bool:
 def create_database(session: Session, database_name: str) -> bool:
     """
     Create database if not exist  by using sqlalchemy.orm.session
-    :type session: sqlalchemy.orm.session.Session
-    :type database_name: str
+    :_type session: sqlalchemy.orm.session.Session
+    :_type database_name: str
     :param session:
     :param database_name:
     :return: if  exist database return False, else True
@@ -58,8 +58,8 @@ def create_database(session: Session, database_name: str) -> bool:
 def switch_database(session: Session, database_name: str) -> Session:
     """
     Switch database by using sqlalchemy.orm.session
-    :type session: sqlalchemy.orm.session.Session
-    :type database_name: str
+    :_type session: sqlalchemy.orm.session.Session
+    :_type database_name: str
     :param session:
     :param database_name:
     :return:
@@ -72,8 +72,8 @@ def switch_database(session: Session, database_name: str) -> Session:
 def get_all_tables(session: Session, database_name: str) -> list:
     """
     Get all tables in database  by using sqlalchemy.orm.session
-    :type session: sqlalchemy.orm.session.Session
-    :type database_name: str
+    :_type session: sqlalchemy.orm.session.Session
+    :_type database_name: str
     :param session:
     :return: list of tables
     """
@@ -89,9 +89,9 @@ def get_all_tables(session: Session, database_name: str) -> list:
 def get_all_columns_of_table(session: Session, database_name: str, table_name: str) -> list:
     """
     Get all columns of a table is database by using sqlalchemy.orm.session
-    :type session: sqlalchemy.orm.session.Session
-    :type database_name: str
-    :type table_name: str
+    :_type session: sqlalchemy.orm.session.Session
+    :_type database_name: str
+    :_type table_name: str
     :param session:
     :param table_name:
     :return:
@@ -108,8 +108,8 @@ def get_all_columns_of_table(session: Session, database_name: str, table_name: s
 def get_all_columns_of_model(engine: Engine, model) -> list[DbColumnInfo]:
     """
     Get all columns of SqLAlchemy model
-    :type engine: sqlalchemy.engine.Engine
-    :type model: sqlalchemy.ext.declarative.declarative_base
+    :_type engine: sqlalchemy.engine.Engine
+    :_type model: sqlalchemy.ext.declarative.declarative_base
     :param model:
     :return:
     """
@@ -129,9 +129,9 @@ def extract_not_exist_columns_of_model(engine, model) -> list:
 def is_exist_table(session: Session, database_name: str, table_name: str) -> bool:
     """
     Use session to check if table is exist
-    :type session: sqlalchemy.orm.session.Session
-    :type database_name: str
-    :type table_name: str
+    :_type session: sqlalchemy.orm.session.Session
+    :_type database_name: str
+    :_type table_name: str
     :param session:
     :param database_name:
      :param table_name:

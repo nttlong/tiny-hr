@@ -1,7 +1,12 @@
 from tenant_manager.manager import Manager
 from sqlalchemy import create_engine
+from sqldb.db import SQLDB
 # create engi
-engine = create_engine('mysql+pymysql://root:123456@localhost')
+# Create a connection to the MS SQL Server database use pymssql
+cnn_str = "mssql+pymssql://sa:123456@localhost/master"
+
+db=SQLDB(cnn_str)
+
 
 
 from app.models.roles import Roles
@@ -12,14 +17,10 @@ from app.models.roles import Roles
 
 
 if __name__ == '__main__':
-    manager = Manager('mysql+pymysql://root:123456@localhost')
-    session = manager.db_session("hrm")
+    db.get_session("hr").query(Roles).filter_by(Code="admin").delete()
+    db.get_session("hr").commit()
+    db.get_session("hr").close()
 
-    role = session.query(Roles).filter_by(Code="admin").first()
-    session.delete(role)
-
-    session.commit()
-    session.close()
 
     print("done")
 

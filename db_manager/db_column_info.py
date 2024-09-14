@@ -18,13 +18,13 @@ class DbColumnInfo:
             if column is None:
                 raise ValueError("column must be provided when engine is not None")
             self.column_name = column.compile(dialect=engine.dialect)
-            self.column_type = column.type.compile(engine.dialect)
+            self.column_type = column._type.compile(engine.dialect)
             self.table_name = column.table.name
             self.db_column_name = column.name
 
         else:
             _column_type = data_type
-            # calculate the column type based on the data type and other parameters
+            # calculate the column _type based on the data _type and other parameters
             if character_maximum_length is not None:
                 _column_type = f"{_column_type}({character_maximum_length})"
             elif numeric_precision is not None and numeric_scale is not None:
