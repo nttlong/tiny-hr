@@ -17,6 +17,7 @@ class Roles(BaseModeCodeName):
     IsSuperAdmin = Column(Boolean, default=False)
     IsActive = Column(Boolean, default=True)
     ViewId = Column(String(255), nullable=True,index=True)
+
     #users = relationship("Users", back_populates="role")
     # view = Column(String(255), nullable=True)
 

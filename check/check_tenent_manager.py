@@ -17,9 +17,12 @@ from app.models.roles import Roles
 
 
 if __name__ == '__main__':
-    db.get_session("hr").query(Roles).filter_by(Code="admin").delete()
-    db.get_session("hr").commit()
-    db.get_session("hr").close()
+    role = Roles(code="abc", name="Admin")
+
+    db.get_session("hr01").add(role)
+    db.get_session("hr01").commit()
+
+    db.get_session("hr01").close()
 
 
     print("done")

@@ -85,9 +85,20 @@ class SQLDB:
         return SQLDB.__db_url_cache_instance[db_url]
 
     def __init__(self, db_url):
+        if "pymssql://" in db_url:
+            self.db_name = db_url.split("/")[-1]
+            self.username = db_url.split("@")[0].split(":")[1]
+            self.password = db_url.split("@")[0].split(":")[2]
+            self.server = db_url.split("@")[1].split(":")[0]
+            self.port = db_url.split("@")[1].split(":")[1]
+
         self.db_url = db_url
         self.db_url_no_database = db_url
         self.engine = create_engine(db_url)
+        self.master_engine = create_engine(db_url)
+        self.master_engine.pool.dispose()
+
+
         self.dialectical = self.engine.dialect.name
         if self.dialectical == "mssql":
             self.db_url_no_database = '/'.join(self.db_url.split('/')[:-1])
@@ -121,11 +132,23 @@ class SQLDB:
         elif self.dialectical == "postgresql":
             raise NotImplementedError("PostgreSQL is not supported yet.")
         elif self.dialectical == "mssql":
-            conn = self.engine.connect()
+            import pymssql
+            conn = pymssql.connect(server=self.db_url_no_database, user=self.engine.url.username, password=self.engine.url.password)
+            cur = conn.cursor()
+            #conn = self.master_engine.connect()
             try:
-                conn.exec_driver_sql(f"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '{db_name}') CREATE DATABASE {db_name}")
-            finally:
+                cur.execute(f"CREATE DATABASE {db_name}")
+                cur.execute(f"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '{db_name}') CREATE DATABASE {db_name}")
+                #sql_create_db_statement = text(f"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '{db_name}') CREATE DATABASE {db_name}")
+                #self.master_session().execute(sql_create_db_statement)
+                #conn.execute(sql_create_db_statement)
+                #self.master_session().commit()
+
+            except Exception as e:
                 conn.close()
+
+                raise e
+
 
         else:
             raise NotImplementedError(f"{self.dialectical} is not supported yet.")
